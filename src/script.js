@@ -157,15 +157,18 @@ window.addEventListener('resize', () =>
 
 })
 
-const boyTexture= textureLoader.load('/models/spaceboy/satelites.png')
+const satTexture= textureLoader.load('/models/spaceboy/satelites.png')
 const boyTexture= textureLoader.load('/models/spaceboy/spaceboy.png')
 const earthTexture = textureLoader.load('/models/spaceboy/globe.png')
 boyTexture.flipY = false
 earthTexture.flipY= false
+satTexture.flipY= false
+
 
 const boyMaterial = new THREE.MeshBasicMaterial({map:boyTexture})
 const earthMaterial = new THREE.MeshBasicMaterial({map:earthTexture})
 const glassMaterial = new THREE.MeshBasicMaterial({map:boyTexture})
+const satMaterial = new THREE.MeshBasicMaterial({map:satTexture})
 glassMaterial.transparent=true;
 glassMaterial.opacity=.3;
 
@@ -212,7 +215,7 @@ let boy = null
 let globe = null
 let turnhead=null
 let walk = null
-
+let sateliteGroup=null
 
 
 gltfLoader.load(
@@ -279,11 +282,16 @@ gltfLoader.load(
         satelites=gltf.scene
         satelites.traverse((child) =>
         {
-            child.material = earthMaterial
+            child.material = satMaterial
         })
-        satelites.scale.set(0.25, 0.25, 0.25)
-        satelites.rotation.z=Math.PI*.2
-        scene.add(satelites)
+        satelites.scale.set(0.15, 0.15, 0.15)
+        
+        
+        sateliteGroup = new THREE.Group()
+        sateliteGroup.add(satelites)
+        sateliteGroup.rotation.z = Math.PI*.2
+        sateliteGroup.position.x=-3
+        scene.add(sateliteGroup)
         console.log("satelites", satelites)
        
 
@@ -320,9 +328,9 @@ camera.position.set(3, 0, 8)
 scene.add(camera)
 
 // Controls
-// const controls = new OrbitControls(camera, canvas)
-// controls.target.set(4, -4, 0)
-// controls.enableDamping = true
+const controls = new OrbitControls(camera, canvas)
+controls.target.set(4, -4, 0)
+controls.enableDamping = true
 
 /**
  * Renderer
@@ -396,6 +404,12 @@ const tick = () =>
     if(globe){
     globe.children[1].rotation.x-=.005
 
+    }
+
+    if(satelites){
+        
+        sateliteGroup.children[0].rotation.y+=.005
+        
     }
 
     if(mixer)
