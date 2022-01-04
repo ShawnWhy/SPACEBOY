@@ -4,20 +4,52 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 // import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { SphereGeometry, TextureLoader } from 'three'
-import CANNON from 'cannon'
+import { LoopOnce, SphereGeometry, TextureLoader } from 'three'
+import CANNON, { Sphere } from 'cannon'
 import $ from "./Jquery"
 
 const textureLoader = new THREE.TextureLoader()
 
 
-//debug
+var audiobounce = new Audio('/glass.wav');
+
+const playHitSound = (collision) =>
+{
+    const impactStrength = collision.contact.getImpactVelocityAlongNormal()
+
+    if(impactStrength > 10)
+    {
+        audiobounce.volume = Math.random()*.6
+        audiobounce.currentTime = 0
+        audiobounce.play()
+    }
+}
 
 
 
-const openButton=document.getElementsByClassName("open");
-const closeButton = document.getElementsByClassName("close")
-const moreButton = document.getElementsByClassName("more")
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
+
+// Scene
+const scene = new THREE.Scene()
+
+const portfolioButton=document.getElementsByClassName("portfolio");
+const aboutButton = document.getElementsByClassName("about")
+const  contactButton = document.getElementsByClassName("contact")
+const  newsButton = document.getElementsByClassName("news")
+const  fireButton = document.getElementsByClassName("fire")
+
+$(fireButton).click(()=>{
+    createMeteor(
+        Math.random()*.5,
+        {
+            x: (Math.random() + 4) * 3,
+            y: (Math.random()*6)-4,
+            z: (Math.random() - 0.5) * 3
+        }
+
+    )
+})
 
 //raycaster
 const raycaster = new THREE.Raycaster()
@@ -34,104 +66,83 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
     defaultMaterial,
     defaultMaterial,
     {
-        friction: 0.8,
+        friction: 30,
         restitution: 0.1
     }
 )
-const bubbleShape = new CANNON.Sphere(3)
+const bubbleShape = new CANNON.Sphere(5.6)
 const bubbleBody = new CANNON.Body({
     mass: 0,
-    position: new CANNON.Vec3(0, -1.5, 0),
+    position: new CANNON.Vec3(0, -8.3, 0),
     shape: bubbleShape,
     material: defaultMaterial
 })
-
-
 world.addBody(bubbleBody)
-
+// const fakeEarthMaterial = new THREE.MeshStandardMaterial({color:'pink'})
+// const fakeEarthGeometry = new THREE.SphereGeometry(5.6,20,20)
+// const fakeEarthMesh = new THREE.Mesh(fakeEarthGeometry, fakeEarthMaterial)
+// fakeEarthMesh.position.copy(bubbleBody.position)
+// scene.add(fakeEarthMesh)
     
 //physics floor
-// const floorShape = new CANNON.Plane()
-// const floorBody = new CANNON.Body()
-// floorBody.mass = 0
-// floorBody.quaternion.setFromAxisAngle(
-//     new CANNON.Vec3(-1,0,0),
-//     Math.PI *0.5
-// )
+const floorShape = new CANNON.Plane()
+const floorBody = new CANNON.Body()
+floorBody.mass = 0
+floorBody.position=new CANNON.Vec3(0, -20, 0)
+floorBody.addShape(floorShape)
+floorBody.quaternion.setFromAxisAngle(
+    new CANNON.Vec3(-1,0,0),
+    Math.PI *0.5
+)
+world.addBody(floorBody)
 //objects to update
 const objectsToUpdate = []
 
-//createbox
+// Create sphere
+const sphereGeometry = new THREE.SphereGeometry(1, 8, 8)
 
-// const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
-// const boxMaterial1 = new THREE.MeshStandardMaterial({
-//    map:wrapperTexture1
-// })
-// const boxMaterial2 = new THREE.MeshStandardMaterial({
-//     map:wrapperTexture2
-//  })
-//  const boxMaterial3 = new THREE.MeshStandardMaterial({
-//     map:wrapperTexture3
-//  })
-//  const boxMaterial4 = new THREE.MeshStandardMaterial({
-//     map:wrapperTexture4
-//  })
 
-// const createBox = (width, height, depth, position,rand) =>
-// {
-//     // Three.js mesh
-//     const mesh = new THREE.Mesh()
-//     switch(rand){
-//         case 1:
-//             mesh.material = boxMaterial1
-//         break;
-//         case 2:
-//             mesh.material = boxMaterial2
-//         break;
-//         case 3:
-//             mesh.material = boxMaterial3
-//         break;
-//         case 4:
-//             mesh.material = boxMaterial4
-//         break;
-//     }
+
+const createMeteor = (radius, position) =>
+{
+    const spherecolor = function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      console.log("fire")
+      const sphereMaterial = new THREE.MeshStandardMaterial({emissive:spherecolor()})
+
+    // Three.js mesh
     
-    
-//     mesh.geometry=boxGeometry
-//     mesh.scale.set(width, height, depth)
-//     mesh.castShadow = true
-//     mesh.position.copy(position)
-//     mesh.geometry.computeBoundingBox();
-//     var max = mesh.geometry.boundingBox.max;
-//     var min = mesh.geometry.boundingBox.min;
-//     var height = max.y - min.y;
-//     var width = max.x - min.x;
-//     wrapperTexture3.repeat.set(width / 1 , height / 1);
-//     wrapperTexture3.needsUpdate = true;
-//     scene.add(mesh)
+    const mesh = new THREE.Mesh(star, sphereMaterial)
+    mesh.scale.set(radius, radius, radius)
+    mesh.rotation.y=Math.PI*.5
+    mesh.position.copy(position)
+    scene.add(mesh)
 
-//     // Cannon.js body
-//     const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
+    // Cannon.js body
+    const shape = new CANNON.Sphere(radius)
 
-//     const body = new CANNON.Body({
-//         mass: 1,
-//         position: new CANNON.Vec3(0, 10, 0),
-//         shape: shape,
-//         material: defaultMaterial
-//     })
-//     body.position.copy(position)
-//     body.addEventListener('collide', playHitSound)
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 5, 0),
+        shape: shape,
+        material: defaultMaterial
+    })
+    body.position.copy(position)
+    body.applyForce(new CANNON.Vec3(- 2000, -500, 0), body.position)
+    body.addEventListener('collide', playHitSound)
 
-//     world.addBody(body)
+    world.addBody(body)
 
-//     // Save in objects
-//     objectsToUpdate.push({ mesh, body })
-// }
-
-// createBox(1, 1.5, 2, { x: 0, y: 3, z: 0 })
-
-
-
+    // Save in objects
+    objectsToUpdate.push({ mesh, body })
+}
 
 /**
  * Sizes
@@ -184,20 +195,6 @@ window.addEventListener('mousemove', (event) =>
 
     // console.log(mouse)
 })
-/**
- * Base
- */
-
-// Canvas
-const canvas = document.querySelector('canvas.webgl')
-
-// Scene
-const scene = new THREE.Scene()
-
-
-
-
-
 
 /**
  * Models
@@ -216,6 +213,7 @@ let globe = null
 let turnhead=null
 let walk = null
 let sateliteGroup=null
+let star=null
 
 
 gltfLoader.load(
@@ -226,7 +224,7 @@ gltfLoader.load(
    
 
         boy=gltf.scene
-        console.log(boy)
+        // console.log(boy)
 
         boy.scale.set(0.25, 0.25, 0.25)
         scene.add(boy)
@@ -244,11 +242,11 @@ gltfLoader.load(
 
         // Animation
         mixer = new THREE.AnimationMixer(boy)
-        console.log(mixer)
+        // console.log(mixer)
         turnhead = mixer.clipAction(gltf.animations[0]) 
 
         walk = mixer.clipAction(gltf.animations[1]) 
-        console.log(walk)
+        // console.log(walk)
         walk.timeScale=2.5
         walk.clampWhenFinished=true
         walk.play()
@@ -268,7 +266,7 @@ gltfLoader.load(
         })
         globe.scale.set(0.25, 0.25, 0.25)
         scene.add(globe)
-        console.log(globe)
+        // console.log(globe)
        
 
 
@@ -284,6 +282,9 @@ gltfLoader.load(
         {
             child.material = satMaterial
         })
+        star = satelites.children[3].geometry
+        console.log(star) 
+
         satelites.scale.set(0.15, 0.15, 0.15)
         
         
@@ -302,19 +303,19 @@ gltfLoader.load(
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight('white', .5)
+const ambientLight = new THREE.AmbientLight('orange', .5)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight('orange', 2)
-directionalLight.castShadow = true
-directionalLight.shadow.mapSize.set(1024, 1024)
-directionalLight.shadow.camera.far = 15
-directionalLight.shadow.camera.left = - 7
-directionalLight.shadow.camera.top = 7
-directionalLight.shadow.camera.right = 7
-directionalLight.shadow.camera.bottom = - 7
-directionalLight.position.set(- 5, 5, 0)
-scene.add(directionalLight)
+// const directionalLight = new THREE.DirectionalLight('orange', 2)
+// directionalLight.castShadow = true
+// directionalLight.shadow.mapSize.set(1024, 1024)
+// directionalLight.shadow.camera.far = 15
+// directionalLight.shadow.camera.left = - 7
+// directionalLight.shadow.camera.top = 7
+// directionalLight.shadow.camera.right = 7
+// directionalLight.shadow.camera.bottom = - 7
+// directionalLight.position.set(- 5, 5, 0)
+// scene.add(directionalLight)
 
 
 
@@ -374,7 +375,18 @@ const tick = () =>
 
 
 
+    $(portfolioButton).mouseover(()=>{
+        console.log("mouseover")
+        sateliteGroup.children[0].rotation.y=Math.PI*.7
+        turnhead.clampWhenFinished=true
+        turnhead.timeScale=3
+        turnhead.setLoop(THREE.LoopOnce)
+        turnhead.play()
 
+
+
+
+    })
 
 
     // if(box != null){
@@ -409,7 +421,23 @@ const tick = () =>
     if(satelites){
         
         sateliteGroup.children[0].rotation.y+=.005
+        sateliteGroup.children[0].children[0].rotation.z+=.015
+        sateliteGroup.children[0].children[2].rotation.x+=.015
+        sateliteGroup.children[0].children[3].rotation.x+=.015
+
+
+        sateliteGroup.children[0].children[0].children[1].rotation.z+=.005
+        sateliteGroup.children[0].children[0].children[2].rotation.z+=.005
+
+        sateliteGroup.children[0].children[1].rotation.z+=.02
+
         
+    }
+    for(const object of objectsToUpdate)
+    {
+        object.mesh.position.copy(object.body.position)
+        object.mesh.quaternion.copy(object.body.quaternion)
+        // object.body.applyForce(new CANNON.Vec3(- 10, 0, 0), object.body.position)
     }
 
     if(mixer)
@@ -417,7 +445,7 @@ const tick = () =>
         mixer.update(deltaTime)
     }
 
-    // controls.update()
+    controls.update()
 
 
 
