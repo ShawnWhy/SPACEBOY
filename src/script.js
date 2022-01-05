@@ -19,7 +19,7 @@ const playHitSound = (collision) =>
 
     if(impactStrength > 10)
     {
-        audiobounce.volume = Math.random()*.6
+        audiobounce.volume = Math.random()
         audiobounce.currentTime = 0
         audiobounce.play()
     }
@@ -165,6 +165,13 @@ window.addEventListener('resize', () =>
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+    if(sizes.width>860){
+        camera.position.set(3, 0, 10)
+        }
+        else{
+            camera.position.set(-25, 0, -10)
+        }
 
 })
 
@@ -328,7 +335,14 @@ scene.add(ambientLight)
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(3, 0, 8)
+if(sizes.width>860){
+camera.position.set(3, 0, 10)
+}
+else{
+    camera.position.set(-25, 0, -10)
+}
+
+
 scene.add(camera)
 
 // Controls
