@@ -175,7 +175,10 @@ boyTexture.flipY = false
 earthTexture.flipY= false
 satTexture.flipY= false
 
-
+const selectMaterial = new THREE.MeshBasicMaterial({color:'orange'})
+const selectMaterial1 = new THREE.MeshBasicMaterial({color:'pink'})
+const selectMaterial2 = new THREE.MeshBasicMaterial({color:'#89cff0'})
+const selectMaterial3 = new THREE.MeshBasicMaterial({color:'#32CD32'})
 const boyMaterial = new THREE.MeshBasicMaterial({map:boyTexture})
 const earthMaterial = new THREE.MeshBasicMaterial({map:earthTexture})
 const glassMaterial = new THREE.MeshBasicMaterial({map:boyTexture})
@@ -204,7 +207,7 @@ window.addEventListener('mousemove', (event) =>
 
 const gltfLoader = new GLTFLoader()
 // gltfLoader.setDRACOLoader(dracoLoader)
-
+let rotation="on"
 let mixer = null
 let mixer2 = null
 let satelites = null
@@ -350,7 +353,95 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 raycaster.setFromCamera(mouse, camera)
 
 
-   
+
+$(portfolioButton).mouseover(()=>{
+    rotation="off"
+    sateliteGroup.children[0].rotation.y=Math.PI*.30
+    turnhead.weight=1
+    turnhead.timeScale=3
+    turnhead.reset();
+    turnhead.clampWhenFinished=true
+    turnhead.setLoop(THREE.LoopOnce)
+    turnhead.play()
+    sateliteGroup.children[0].children[3].material=selectMaterial
+
+})
+$(aboutButton).mouseover(()=>{
+    rotation="off"
+    sateliteGroup.children[0].rotation.y=Math.PI*.75
+    turnhead.weight=1
+    turnhead.timeScale=3
+    turnhead.reset();
+    turnhead.clampWhenFinished=true
+    turnhead.setLoop(THREE.LoopOnce)
+    turnhead.play()
+    sateliteGroup.children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[2].material=satMaterial
+    sateliteGroup.children[0].children[3].material=satMaterial
+
+
+    sateliteGroup.children[0].children[0].children[0].material=selectMaterial2
+    sateliteGroup.children[0].children[0].children[1].material=selectMaterial2
+    sateliteGroup.children[0].children[0].children[2].material=selectMaterial2
+
+})
+$(contactButton).mouseover(()=>{
+    rotation="off"
+    sateliteGroup.children[0].rotation.y=Math.PI*1.25
+    turnhead.weight=1
+    turnhead.timeScale=3
+    turnhead.reset();
+    turnhead.clampWhenFinished=true
+    turnhead.setLoop(THREE.LoopOnce)
+    turnhead.play()
+    sateliteGroup.children[0].children[2].material=satMaterial
+    sateliteGroup.children[0].children[3].material=satMaterial
+    sateliteGroup.children[0].children[0].children[0].material=satMaterial
+    sateliteGroup.children[0].children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[0].children[2].material=satMaterial
+    sateliteGroup.children[0].children[1].material=selectMaterial3
+
+})
+$(newsButton).mouseover(()=>{
+    rotation="off"
+    sateliteGroup.children[0].rotation.y=Math.PI*1.75
+    turnhead.weight=1
+    turnhead.timeScale=3
+    turnhead.reset();
+    turnhead.clampWhenFinished=true
+    turnhead.setLoop(THREE.LoopOnce)
+    sateliteGroup.children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[3].material=satMaterial
+    sateliteGroup.children[0].children[0].children[0].material=satMaterial
+    sateliteGroup.children[0].children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[0].children[2].material=satMaterial
+    sateliteGroup.children[0].children[2].material=selectMaterial1
+    turnhead.play()
+
+})
+
+$(".button").mouseout(()=>{
+    
+    turnhead.weight=0
+    turnhead.timeScale=-1;
+    
+    turnhead.clampWhenFinished=true
+
+    turnhead.weight=0;
+    sateliteGroup.children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[2].material=satMaterial
+    sateliteGroup.children[0].children[3].material=satMaterial
+
+
+    sateliteGroup.children[0].children[0].children[0].material=satMaterial
+    sateliteGroup.children[0].children[0].children[1].material=satMaterial
+    sateliteGroup.children[0].children[0].children[2].material=satMaterial
+    turnhead.play()
+
+    rotation="on"
+
+
+})
 /**
  * Animate
  */
@@ -360,6 +451,12 @@ let oldElapsedTime=null;
 const clock = new THREE.Clock()
 let previousTime = 0
 const tick = () =>
+
+
+
+
+
+   
 {
     for(const object of objectsToUpdate)
     {
@@ -375,18 +472,7 @@ const tick = () =>
 
 
 
-    $(portfolioButton).mouseover(()=>{
-        console.log("mouseover")
-        sateliteGroup.children[0].rotation.y=Math.PI*.7
-        turnhead.clampWhenFinished=true
-        turnhead.timeScale=3
-        turnhead.setLoop(THREE.LoopOnce)
-        turnhead.play()
-
-
-
-
-    })
+   
 
 
     // if(box != null){
@@ -412,6 +498,7 @@ const tick = () =>
 
     // }
 
+    if(rotation==="on"){
 
     if(globe){
     globe.children[1].rotation.x-=.005
@@ -433,6 +520,7 @@ const tick = () =>
 
         
     }
+}
     for(const object of objectsToUpdate)
     {
         object.mesh.position.copy(object.body.position)
