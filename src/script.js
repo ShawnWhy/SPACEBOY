@@ -8,6 +8,12 @@ import { LoopOnce, SphereGeometry, TextureLoader } from 'three'
 import CANNON, { Sphere } from 'cannon'
 import $ from "./Jquery"
 
+
+
+const about = "<p>Shawn Is a person</p>"
+const contact = "<div><a href='mailto:shawnyudesign@gmail.com'>shawnyudesign@gmail.com</a></div>"
+const portfolio = '<div><ul><li><a href="https://shawnwhy.github.io/Cosmotree/">Cosmo Tree</a></li> <li><a href="https://shawnwhy.github.io/CloudySky/">Sky Over Berlin</a></li><li><a href="https://shawnwhy.github.io/CandieEater/">Diary of a Candy Eater</a></div>'
+const news = "<p>Under Construction</p>"
 const textureLoader = new THREE.TextureLoader()
 
 
@@ -197,6 +203,44 @@ glassMaterial.opacity=.3;
 const mouse = new THREE.Vector2()
 mouse.x = null
 mouse.y=null
+
+$(".button").click((e)=>{
+
+    console.log("clock")
+    e.preventDefault();
+    e.stopPropagation();
+
+    $(".monitor").removeClass("invisibleP")
+    $(".menue").addClass("invisibleP")
+    var ButtonName = $(e.target).attr("name")
+    switch(ButtonName){
+        case "portfolio":
+            $(".display").html(portfolio)
+            break;
+            case "contact":
+            $(".display").html(contact)
+            break;
+            case "about":
+            $(".display").html(about)
+            break;
+            case "news":
+                $(".display").html(news)
+                break;
+    }
+
+
+})
+
+$(".xButton").click((e)=>{
+
+    
+    e.preventDefault();
+    e.stopPropagation();
+
+    $(".monitor").addClass("invisibleP")
+    $(".menue").removeClass("invisibleP")
+
+})
 
 window.addEventListener('mousemove', (event) =>
 {
